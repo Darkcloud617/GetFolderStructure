@@ -1,0 +1,59 @@
+import os
+from openpyxl import Workbook
+
+def normalize_path(path):
+    return os.path.normpath(path).lower()
+
+def compare_folders(folder1, folder2):
+    missing_files = []
+    folder1_files = set()
+    folder2_files = set()
+    
+    # Walk through folder1 and record all file paths
+    for dirpath, dirnames, filenames in os.walk(folder1):
+        for file in filenames:
+            full_path = os.path.join(dirpath, file)
+            normalized_path = normalize_path(full_path.replace(folder1, ""))
+            folder1_files.add(normalized_path)
+    
+    # Walk through folder2 and record all file paths
+    for dirpath, dirnames, filenames in os.walk(folder2):
+        for file in filenames:
+            full_path = os.path.join(dirpath, file)
+            normalized_path = normalize_path(full_path.replace(folder2, ""))
+            folder2_files.add(normalized_path)
+    
+    # Find files that are in folder1 but not in folder2
+    missing_files = list(folder1_files - folder2_files)
+    
+    return missing_files
+
+def export_to_excel(missing_files, output_file):
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Missing Files"
+    
+    ws.append(["Missing Files"])
+    
+    for file in missing_files:
+        ws.append([file])
+    
+    wb.save(output_file)
+    print(f"File saved successfully at {output_file}")
+
+def main():
+    folder1 = r"C:\Users\JefferyCollins\Northpoint Mortgage\Northpoint Shared Folders - Documents\QC Audit"
+    folder2 = r"S:\Shared With Me\QC Audit"
+    output_file = r"C:\Users\JefferyCollins\Desktop\LM\CSV\missing_files.xlsx"
+    
+    missing_files = compare_folders(folder1, folder2)
+    
+    if missing_files:
+        export_to_excel(missing_files, output_file)
+        print(f"Missing files have been exported to {output_file}")
+    else:
+        print("No missing files. Both folders are in sync.")
+
+if __name__ == "__main__":
+    main()
+
