@@ -1,0 +1,34 @@
+import os
+import csv
+from datetime import datetime
+
+# Path to the directory
+path = r"Path/To/Folder"
+
+# CSV name
+csv_file = "folder_structure.csv"
+
+data = []
+
+def get_modification_date(filepath):
+    return datetime.fromtimestamp(os.path.getmtime(filepath)).strftime('%Y-%m-%d %H:%M:%S')
+
+# Walk directory
+for root, dirs, files in os.walk(path):
+    # Iterate child directories
+    for subdir in dirs:
+        subdir_path = os.path.join(root, subdir)
+        data.append([subdir_path, "Folder", get_modification_date(subdir_path)])
+    
+    # Iterate files
+    for file in files:
+        file_path = os.path.join(root, file)
+        data.append([file_path, "File", get_modification_date(file_path)])
+
+# Create CSV
+with open(csv_file, mode='w', newline='', encoding='utf-8') as file:
+    writer = csv.writer(file)
+    writer.writerow(["Path", "Type", "Date Modified"])  # Write header
+    writer.writerows(data)
+
+print(f"Data saved to {csv_file}")
